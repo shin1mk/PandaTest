@@ -5,28 +5,7 @@
 //  Created by SHIN MIKHAIL on 15.02.2024.
 //
 
-struct ScreenModel {
-    var isBlocked: Bool
-}
-
 import SwiftUI
-
-class ContentViewModel: ObservableObject {
-    @Published var model: ScreenModel
-    @Published var isDetailScreenPresented = false
-    
-    init() {
-        self.model = ScreenModel(isBlocked: false)
-    }
-    
-    func toggleBlock() {
-        self.model.isBlocked.toggle()
-    }
-    
-    func toggleDetailScreen() {
-        self.isDetailScreenPresented.toggle()
-    }
-}
 
 struct ContentView: View {
     @StateObject private var viewModel = ContentViewModel()
@@ -70,13 +49,12 @@ struct ContentView: View {
                         )
                 }
                 .disabled(viewModel.model.isBlocked)
-                .opacity(viewModel.model.isBlocked ? 0.5 : 1.0) // Dim the button if blocked
+                .opacity(viewModel.model.isBlocked ? 0.5 : 1.0)
             }
             .padding(.horizontal, 20)
             
             Spacer()
             
-            // Дополнительная кнопка внизу экрана
             Button(action: {
                 viewModel.toggleDetailScreen()
             }) {
@@ -98,39 +76,6 @@ struct ContentView: View {
         .fullScreenCover(isPresented: self.$viewModel.isDetailScreenPresented) {
             DetailView(isPresented: self.$viewModel.isDetailScreenPresented)
         }
-    }
-}
-
-struct DetailView: View {
-    @Binding var isPresented: Bool
-    
-    var body: some View {
-        ZStack {
-            Image("panda")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
-                .clipped()
-            
-            VStack {
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        isPresented = false
-                    }) {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(width: 32, height: 32)
-                    }
-                    .background(Color.gray)
-                    .clipShape(Circle())
-                    .padding(20)
-                }
-                Spacer()
-            }
-        }
-        .edgesIgnoringSafeArea(.all)
     }
 }
 
