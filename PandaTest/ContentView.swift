@@ -5,14 +5,32 @@
 //  Created by SHIN MIKHAIL on 15.02.2024.
 //
 
-import SwiftUI
+struct ScreenModel {
+    var isBlocked: Bool
+}
 
 import SwiftUI
+
+class ContentViewModel: ObservableObject {
+    @Published var model: ScreenModel
+    @Published var isDetailScreenPresented = false
+    
+    init() {
+        self.model = ScreenModel(isBlocked: false)
+    }
+    
+    func toggleBlock() {
+        self.model.isBlocked.toggle()
+    }
+    
+    func toggleDetailScreen() {
+        self.isDetailScreenPresented.toggle()
+    }
+}
 
 struct ContentView: View {
-    @State private var isBlocked = false
-    @State private var isDetailScreenPresented = false
-
+    @StateObject private var viewModel = ContentViewModel()
+    
     var body: some View {
         VStack(spacing: 20) {
             Image("panda")
@@ -20,12 +38,12 @@ struct ContentView: View {
                 .aspectRatio(contentMode: .fill)
                 .frame(width: 150, height: UIScreen.main.bounds.height * 0.3)
                 .clipped()
-
+            
             HStack(spacing: 20) {
                 Button(action: {
-                    self.isBlocked.toggle()
+                    viewModel.toggleBlock()
                 }) {
-                    Text(self.isBlocked ? "Lock" : "Locked")
+                    Text(viewModel.model.isBlocked ? "Lock" : "Locked")
                         .frame(height: 56)
                         .frame(maxWidth: .infinity)
                         .background(Color.blue)
@@ -36,9 +54,9 @@ struct ContentView: View {
                                 .stroke(Color.indigo, lineWidth: 3)
                         )
                 }
-
+                
                 Button(action: {
-                    self.isDetailScreenPresented.toggle()
+                    viewModel.toggleDetailScreen()
                 }) {
                     Text("Open from top")
                         .frame(height: 56)
@@ -51,16 +69,16 @@ struct ContentView: View {
                                 .stroke(Color.indigo, lineWidth: 3)
                         )
                 }
-                .disabled(self.isBlocked)
-                .opacity(self.isBlocked ? 0.5 : 1.0) // Dim the button if blocked
+                .disabled(viewModel.model.isBlocked)
+                .opacity(viewModel.model.isBlocked ? 0.5 : 1.0) // Dim the button if blocked
             }
             .padding(.horizontal, 20)
-
+            
             Spacer()
-
+            
             // Дополнительная кнопка внизу экрана
             Button(action: {
-                self.isDetailScreenPresented.toggle()
+                viewModel.toggleDetailScreen()
             }) {
                 Text("Open full")
                     .frame(height: 56)
@@ -76,16 +94,16 @@ struct ContentView: View {
             .padding(.horizontal, 20)
         }
         .background(Color.gray.edgesIgnoringSafeArea(.all))
-        .fullScreenCover(isPresented: $isDetailScreenPresented) {
-            DetailView(isPresented: $isDetailScreenPresented)
-                .transition(.move(edge: .top)) // Анимация сверху вниз
+        
+        .fullScreenCover(isPresented: self.$viewModel.isDetailScreenPresented) {
+            DetailView(isPresented: self.$viewModel.isDetailScreenPresented)
         }
     }
 }
 
 struct DetailView: View {
     @Binding var isPresented: Bool
-
+    
     var body: some View {
         ZStack {
             Image("panda")
@@ -93,7 +111,7 @@ struct DetailView: View {
                 .aspectRatio(contentMode: .fill)
                 .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
                 .clipped()
-
+            
             VStack {
                 HStack {
                     Spacer()
